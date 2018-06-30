@@ -8,4 +8,4 @@ class WalletContextManager:
         self.wallet_eos_client.wallet_unlock(self.wallet_pasword, self.wallet_name)
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        self.wallet_eos_client.wallet_lock()
+        self.wallet_eos_client.wallet_lock(self.wallet_name)
