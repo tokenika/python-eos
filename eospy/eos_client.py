@@ -81,7 +81,22 @@ class EosClient:
             'id': transaction_id
         })
 
-    # ===== SYSTEM CONTRACT TRANSACTIONS =====
+    # ===== EOSIO STANDARD TRANSACTIONS =====
+    def get_transfer_binargs(self, from_, to, quantity, memo):
+        return self.chain_abi_json_to_bin({
+            "code": "eosio.token", "action": "transfer",
+            "args": {"from": from_, "to": to, "quantity": quantity, "memo": memo}
+        })
+
+    def transfer(self, from_, to, amount, memo):
+        transfer_binargs = self.get_transfer_binargs(from_, to, amount, memo)
+        transaction, chain_id = TransactionBuilder(self).build_sign_transaction_request((
+            Action('eosio.token', 'transfer', from_, 'active', transfer_binargs),
+        ))
+        return self.push_transaction(transaction, chain_id)
+
+    # ===== EOSIO SYSTEM CONTRACT =====
+
     def get_system_newaccount_binargs(self, creator, name, owner_key, active_key):
         return self.chain_abi_json_to_bin({
             "code": "eosio", "action": "newaccount",
@@ -144,13 +159,15 @@ class EosClient:
             Action('eosio', 'buyrambytes', creator_account, 'active', buyrambytes_binargs),
             Action('eosio', 'delegatebw', creator_account, 'active', delegatebw_binargs),
         ))
+        return self.push_transaction(transaction, chain_id)
 
+    # ===== HIGHER-LEVEL METHODS =====
+    def push_transaction(self, transaction, chain_id):
         available_public_keys = self.wallet_get_public_keys()
         required_public_keys = self.chain_get_required_keys(transaction, available_public_keys)['required_keys']
         signed_transaction = self.wallet_sign_transaction(transaction, required_public_keys, chain_id)
         return self.chain_push_transaction(signed_transaction)
 
-    # ===== HIGHER-LEVEL METHODS =====
     def get_last_action_seq_on_account(self, account):
         return self.history_get_actions(account, pos=-1, offset=-1)['actions'][0]['account_action_seq']
 
