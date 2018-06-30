@@ -3,6 +3,7 @@ import time
 import urllib.request
 import urllib.parse
 
+from eospy.wallet_context_manager import WalletContextManager
 from . import endpoints
 from .transaction_builder import TransactionBuilder, Action
 
@@ -32,11 +33,20 @@ class EosClient:
         return self.request(self.wallet_endpoint, uri, body)
 
     # ===== v1/wallet/ =====
+    def wallet_create(self, wallet='default'):
+        return self.wallet_request(endpoints.WALLET_CREATE, wallet)
+
+    def wallet_unlock(self, password, wallet='default'):
+        return self.wallet_request(endpoints.WALLET_UNLOCK, [wallet, password])
+
     def wallet_lock(self, wallet='default'):
         return self.wallet_request(endpoints.WALLET_LOCK, wallet)
 
     def wallet_open(self, wallet='default'):
         return self.wallet_request(endpoints.WALLET_OPEN, wallet)
+
+    def wallet_import_key(self, private_key, wallet='default'):
+        return self.wallet_request(endpoints.WALLET_IMPORT_KEY, [wallet, private_key])
 
     def wallet_get_public_keys(self):
         return self.wallet_request(endpoints.WALLET_GET_PUBLIC_KEYS)
@@ -186,3 +196,6 @@ class EosClient:
                 time.sleep(0.5)
                 continue
             start_from = actions[-1]['account_action_seq'] + 1
+
+    def wallet_operations(self, wallet_password):
+        return WalletContextManager(self, wallet_password)

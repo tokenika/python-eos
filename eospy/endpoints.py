@@ -1,9 +1,11 @@
 DEFAULT_EOS_API_ENDPOINT = 'https://api.tokenika.io'
 
 
-WALLET_OPEN = '/v1/wallet/open'
+WALLET_CREATE = 'v1/wallet/create'
+WALLET_OPEN = 'v1/wallet/open'
 WALLET_UNLOCK = 'v1/wallet/unlock'
 WALLET_LOCK = 'v1/wallet/lock'
+WALLET_IMPORT_KEY = 'v1/wallet/import_key'
 WALLET_SIGN_TRANSACTION = 'v1/wallet/sign_transaction'
 WALLET_GET_PUBLIC_KEYS = 'v1/wallet/get_public_keys'
 
