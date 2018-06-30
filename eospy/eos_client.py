@@ -76,6 +76,11 @@ class EosClient:
             'offset': offset,
         })
 
+    def history_get_transaction(self, transaction_id):
+        return self.api_request(endpoints.HISTORY_GET_TRANSACTION, {
+            'id': transaction_id
+        })
+
     # ===== SYSTEM CONTRACT TRANSACTIONS =====
     def get_system_newaccount_binargs(self, creator, name, owner_key, active_key):
         return self.chain_abi_json_to_bin({
