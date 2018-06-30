@@ -1,9 +1,10 @@
 import json
+import time
 import urllib.request
 import urllib.parse
 
-from eospy import endpoints
-from eospy.transaction_builder import TransactionBuilder, Action
+from . import endpoints
+from .transaction_builder import TransactionBuilder, Action
 
 
 class EosClient:
@@ -65,6 +66,14 @@ class EosClient:
             'transaction': transaction,
             'compression': 'none',
             'signatures': transaction['signatures']
+        })
+
+    # ===== v1/history/ =====
+    def history_get_actions(self, account_name, pos=-1, offset=-20):
+        return self.api_request(endpoints.HISTORY_GET_ACTIONS, {
+            'account_name': account_name,
+            'pos': pos,
+            'offset': offset,
         })
 
     # ===== SYSTEM CONTRACT TRANSACTIONS =====
@@ -135,6 +144,27 @@ class EosClient:
         required_public_keys = self.chain_get_required_keys(transaction, available_public_keys)['required_keys']
         signed_transaction = self.wallet_sign_transaction(transaction, required_public_keys, chain_id)
         return self.chain_push_transaction(signed_transaction)
+
+    # ===== HIGHER-LEVEL METHODS =====
+    def get_last_action_seq_on_account(self, account):
+        return self.history_get_actions(account, pos=-1, offset=-1)['actions'][0]['account_action_seq']
+
+    def stream_actions_from_account(self, account_name, start_from=-1, filter_by_action_name=None):
+        if start_from == -1:
+            start_from = self.get_last_action_seq_on_account(account_name)
+        while True:
+            actions = self.history_get_actions(account_name, start_from, 100)['actions']
+            for action in actions:
+                if not filter_by_action_name:
+                    yield action
+                else:
+                    if action['action_trace']['act']['name'] == filter_by_action_name:
+                        yield action
+            if not actions:
+                time.sleep(0.5)
+                continue
+            start_from = actions[-1]['account_action_seq'] + 1
+
 
 
 # w = Client(wallet_endpoint='http://localhost:8900')
