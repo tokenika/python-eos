@@ -98,10 +98,10 @@ class EosClient:
             "args": {"from": from_, "to": to, "quantity": quantity, "memo": memo}
         })
 
-    def transfer(self, from_, to, amount, memo):
+    def transfer(self, from_, to, amount, memo, permission='active'):
         transfer_binargs = self.get_transfer_binargs(from_, to, amount, memo)
         transaction, chain_id = TransactionBuilder(self).build_sign_transaction_request((
-            Action('eosio.token', 'transfer', from_, 'active', transfer_binargs),
+            Action('eosio.token', 'transfer', from_, permission, transfer_binargs),
         ))
         return self.push_transaction(transaction, chain_id)
 
@@ -156,7 +156,7 @@ class EosClient:
             }})['binargs']
 
     def system_newaccount(self, creator_account, created_account, owner_key, active_key,
-                          stake_net_quantity, stake_cpu_quantity, transfer, buy_ram_kbytes):
+                          stake_net_quantity, stake_cpu_quantity, transfer, buy_ram_kbytes, permission='active'):
         newaccount_binargs = self.get_system_newaccount_binargs(
             creator_account, created_account, owner_key, active_key)
         buyrambytes_binargs = self.get_system_buyrambytes_binargs(
@@ -165,9 +165,9 @@ class EosClient:
             creator_account, created_account, stake_net_quantity, stake_cpu_quantity, transfer)
 
         transaction, chain_id = TransactionBuilder(self).build_sign_transaction_request((
-            Action('eosio', 'newaccount', creator_account, 'active', newaccount_binargs),
-            Action('eosio', 'buyrambytes', creator_account, 'active', buyrambytes_binargs),
-            Action('eosio', 'delegatebw', creator_account, 'active', delegatebw_binargs),
+            Action('eosio', 'newaccount', creator_account, permission, newaccount_binargs),
+            Action('eosio', 'buyrambytes', creator_account, permission, buyrambytes_binargs),
+            Action('eosio', 'delegatebw', creator_account, permission, delegatebw_binargs),
         ))
         return self.push_transaction(transaction, chain_id)
 
