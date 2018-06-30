@@ -197,5 +197,5 @@ class EosClient:
                 continue
             start_from = actions[-1]['account_action_seq'] + 1
 
-    def wallet_operations(self, wallet_password):
-        return WalletContextManager(self, wallet_password)
+    def wallet_operations(self, wallet_password, wallet_name='default'):
+        return WalletContextManager(self, wallet_password, wallet_name)
