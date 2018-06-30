@@ -169,13 +169,3 @@ class EosClient:
                 time.sleep(0.5)
                 continue
             start_from = actions[-1]['account_action_seq'] + 1
-
-
-
-# w = Client(wallet_endpoint='http://localhost:8900')
-# w.system_newaccount(
-#     'tokenika4eos', 'perduta1test',
-#     'EOS7VdRNSwuoUWjYEP4vG4Kz2Xe4HWHUDKxcHbqkAjoT2wk17ZB1y',
-#     'EOS7VdRNSwuoUWjYEP4vG4Kz2Xe4HWHUDKxcHbqkAjoT2wk17ZB1y',
-#     '0.2500 EOS', '0.2500 EOS', True, 8
-# )
