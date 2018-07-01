@@ -1,7 +1,10 @@
 import json
+import logging
 import time
 import urllib.request
 import urllib.parse
+import urllib.error
+from io import BytesIO
 
 from eospy.wallet_context_manager import WalletContextManager
 from . import endpoints
@@ -21,8 +24,15 @@ class EosClient:
             body = json.dumps(body).encode()
         url = urllib.parse.urljoin(endpoint, uri)
         request = urllib.request.Request(url, data=body)
-        response = urllib.request.urlopen(request)
-        return json.load(response)
+        try:
+            response = urllib.request.urlopen(request)
+            return json.load(response)
+        except urllib.error.HTTPError as http_error:
+            logger = logging.getLogger(__name__)
+            http_error_response = http_error.read()
+            logger.exception(http_error_response.decode())
+            fp = BytesIO(http_error_response)
+            raise urllib.error.HTTPError(http_error.url, http_error.code, http_error.msg, http_error.hdrs, fp)
 
     def api_request(self, uri, body=None):
         return self.request(self.api_endpoint, uri, body)
@@ -96,7 +106,7 @@ class EosClient:
         return self.chain_abi_json_to_bin({
             "code": "eosio.token", "action": "transfer",
             "args": {"from": from_, "to": to, "quantity": quantity, "memo": memo}
-        })
+        })['binargs']
 
     def transfer(self, from_, to, amount, memo, permission='active'):
         transfer_binargs = self.get_transfer_binargs(from_, to, amount, memo)
